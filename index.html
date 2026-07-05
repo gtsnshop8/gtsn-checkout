@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>GTSNSHOP Secure Checkout</title>
+<style>
+:root{
+--bg1:#0f172a;--bg2:#1e293b;--glass:rgba(255,255,255,.12);--border:rgba(255,255,255,.18);
+--text:#fff;--accent:#7c3aed;--accent2:#06b6d4;
+}
+*{box-sizing:border-box}html,body{margin:0;height:100%;font-family:Inter,Segoe UI,Arial,sans-serif;color:var(--text);overflow-x:hidden}
+body{
+background:linear-gradient(-45deg,#0f172a,#312e81,#0f766e,#111827);
+background-size:400% 400%;
+animation:bg 16s ease infinite;
+}
+@keyframes bg{0%{background-position:0 50%}50%{background-position:100% 50%}100%{background-position:0 50%}}
+#particles{position:fixed;inset:0;pointer-events:none}
+.loader{position:fixed;inset:0;background:#0b1020;display:flex;align-items:center;justify-content:center;z-index:9999;transition:.6s}
+.loader.hide{opacity:0;visibility:hidden}
+.spinner{width:64px;height:64px;border:6px solid #ffffff33;border-top-color:#fff;border-radius:50%;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.wrap{min-height:100%;display:flex;align-items:center;justify-content:center;padding:30px}
+.card{
+width:min(760px,100%);
+backdrop-filter:blur(20px);
+background:var(--glass);
+border:1px solid var(--border);
+border-radius:28px;
+padding:28px;
+box-shadow:0 20px 60px rgba(0,0,0,.35);
+animation:up .8s ease}
+@keyframes up{from{opacity:0;transform:translateY(25px)}to{opacity:1;transform:none}}
+h1{margin:0;font-size:2rem;font-weight:800}
+.sub{opacity:.8;margin:.5rem 0 1.5rem}
+.qr{display:block;width:min(320px,100%);margin:20px auto;border-radius:18px;cursor:pointer;border:2px solid #ffffff22}
+.field{margin:16px 0}
+label{display:block;margin-bottom:8px;font-size:.95rem}
+input{
+width:100%;padding:14px;border-radius:14px;border:1px solid #ffffff22;background:#ffffff10;color:#fff;outline:none}
+.preview{display:none;margin-top:12px;max-width:100%;border-radius:14px}
+.actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:22px}
+button,a.btn{
+flex:1;text-align:center;text-decoration:none;color:#fff;
+padding:15px;border:none;border-radius:16px;background:linear-gradient(135deg,var(--accent),var(--accent2));
+cursor:pointer;position:relative;overflow:hidden;font-weight:700}
+button:disabled{opacity:.6}
+.modal{position:fixed;inset:0;background:#000b;display:none;align-items:center;justify-content:center;padding:20px;z-index:99}
+.modal img{max-width:90vw;max-height:90vh;border-radius:20px}
+@media(max-width:600px){h1{font-size:1.6rem}.card{padding:20px}}
+</style>
+</head>
+<body>
+<div class="loader" id="loader"><div class="spinner"></div></div>
+<canvas id="particles"></canvas>
+<div class="wrap">
+<div class="card">
+<h1>GTSNSHOP Secure Checkout</h1>
+<div class="sub">Premium QRPH Payment Portal</div>
+
+<img id="qr" class="qr" src="https://placehold.co/800x800/png?text=QRPH+QR+HERE" alt="QR">
+
+<div class="field">
+<label>Reference ID</label>
+<input id="ref" placeholder="Enter payment reference ID">
+</div>
+
+<div class="field">
+<label>Upload Payment Screenshot</label>
+<input id="file" type="file" accept="image/*">
+<img id="preview" class="preview">
+</div>
+
+<div class="actions">
+<button id="continue">Continue</button>
+<a class="btn" id="tg" href="https://t.me/YOUR_USERNAME" target="_blank">Contact Telegram</a>
+</div>
+</div>
+</div>
+
+<div class="modal" id="modal"><img id="zoom"></div>
+
+<script>
+setTimeout(()=>loader.classList.add('hide'),1200);
+
+const c=document.getElementById("particles"),x=c.getContext("2d");
+function rs(){c.width=innerWidth;c.height=innerHeight}
+rs();addEventListener("resize",rs);
+const pts=[...Array(70)].map(()=>({x:Math.random()*c.width,y:Math.random()*c.height,r:Math.random()*2+1,v:Math.random()*0.5+0.2}));
+(function a(){x.clearRect(0,0,c.width,c.height);x.fillStyle="rgba(255,255,255,.55)";
+pts.forEach(p=>{p.y+=p.v;if(p.y>c.height)p.y=0;x.beginPath();x.arc(p.x,p.y,p.r,0,6.28);x.fill()});requestAnimationFrame(a)})();
+
+file.onchange=e=>{
+const f=e.target.files[0];if(!f)return;
+const r=new FileReader();
+r.onload=()=>{preview.src=r.result;preview.style.display="block";}
+r.readAsDataURL(f);
+};
+
+qr.onclick=()=>{zoom.src=qr.src;modal.style.display="flex";}
+modal.onclick=()=>modal.style.display="none";
+
+continue.onclick=e=>{
+const b=e.currentTarget;
+const ripple=document.createElement("span");
+const r=b.getBoundingClientRect();
+ripple.style.cssText=`position:absolute;border-radius:50%;background:#fff6;transform:scale(0);
+left:${event.clientX-r.left}px;top:${event.clientY-r.top}px;width:20px;height:20px;animation:r .6s`;
+b.appendChild(ripple);setTimeout(()=>ripple.remove(),600);
+if(!ref.value.trim()) return alert("Please enter your Reference ID.");
+if(!file.files.length) return alert("Please upload your payment screenshot.");
+b.disabled=true;b.textContent="Processing...";
+setTimeout(()=>{alert("Submission validated. Integrate your backend/API here.");b.disabled=false;b.textContent="Continue";},1200);
+}
+const st=document.createElement("style");st.textContent="@keyframes r{to{transform:translate(-50%,-50%) scale(15);opacity:0}}";document.head.appendChild(st);
+
+// Dark mode follows system automatically.
+</script>
+</body>
+</html>
